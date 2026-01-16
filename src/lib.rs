@@ -31,8 +31,6 @@ const DESCRIPTION: &str = "Shows the server rules.";
 const PERMISSION_NODE: &str = "rulez:rules";
 
 
-// ---------------- COMMAND EXECUTOR ----------------
-
 struct RulesExecutor {
     rules_path: String,
 }
@@ -60,14 +58,12 @@ impl CommandExecutor for RulesExecutor {
 }
 
 
-// ---------------- PLUGIN LIFECYCLE ----------------
 
 #[plugin_method]
 async fn on_load(&mut self, server: Arc<Context>) -> Result<(), String> {
     server.init_log();
     log::info!("Rulez plugin loaded");
 
-    // Convert PathBuf → String (IMPORTANT FIX)
     let data_folder_path = server.get_data_folder();
     let data_folder = data_folder_path.to_string_lossy().to_string();
 
@@ -75,7 +71,6 @@ async fn on_load(&mut self, server: Arc<Context>) -> Result<(), String> {
 
     let rules_path = format!("{}/rules.txt", data_folder);
 
-    // Create default rules.txt if missing
     if !Path::new(&rules_path).exists() {
         let default_rules = "\
 §6§lServer Rules§r
@@ -88,7 +83,6 @@ async fn on_load(&mut self, server: Arc<Context>) -> Result<(), String> {
         fs::write(&rules_path, default_rules).ok();
     }
 
-    // Register permission (everyone)
     let permission = Permission::new(
         PERMISSION_NODE,
         "Allows players to view server rules",
@@ -96,7 +90,6 @@ async fn on_load(&mut self, server: Arc<Context>) -> Result<(), String> {
     );
     server.register_permission(permission).await?;
 
-    // Register /rules command
     let command = CommandTree::new(COMMAND_NAMES, DESCRIPTION)
         .execute(RulesExecutor { rules_path });
 
@@ -106,7 +99,6 @@ async fn on_load(&mut self, server: Arc<Context>) -> Result<(), String> {
 }
 
 
-// ---------------- PLUGIN BASE ----------------
 
 #[plugin_impl]
 pub struct RulezPlugin;
